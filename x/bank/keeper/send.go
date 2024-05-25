@@ -40,6 +40,8 @@ type BaseSendKeeper struct {
 
 	// list of addresses that are restricted from receiving transactions
 	blockedAddrs map[string]bool
+
+	sendCoinsRestrictionFn SendRestrictionFn
 }
 
 func NewBaseSendKeeper(
@@ -52,6 +54,9 @@ func NewBaseSendKeeper(
 		storeKey:       storeKey,
 		paramSpace:     paramSpace,
 		blockedAddrs:   blockedAddrs,
+		sendCoinsRestrictionFn: func(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, amt sdk.Coins) (newToAddr sdk.AccAddress, err error) {
+			return toAddr, nil
+		},
 	}
 }
 
@@ -130,7 +135,12 @@ func (k BaseSendKeeper) InputOutputCoins(ctx sdk.Context, inputs []types.Input, 
 // SendCoins transfers amt coins from a sending account to a receiving account.
 // An error is returned upon failure.
 func (k BaseSendKeeper) SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error {
-	err := k.subUnlockedCoins(ctx, fromAddr, amt)
+	toAddr, err := k.sendCoinsRestrictionFn(ctx, fromAddr, toAddr, amt)
+	if err != nil {
+		return err
+	}
+
+	err = k.subUnlockedCoins(ctx, fromAddr, amt)
 	if err != nil {
 		return err
 	}
