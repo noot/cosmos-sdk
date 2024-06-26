@@ -105,6 +105,16 @@ func (k BaseSendKeeper) InputOutputCoins(ctx sdk.Context, inputs []types.Input, 
 		if err != nil {
 			return err
 		}
+
+		for _, in := range inputs {
+			inAddress, _ := sdk.AccAddressFromBech32(in.Address)
+
+			outAddress, err = k.sendCoinsRestrictionFn(ctx, inAddress, outAddress, out.Coins)
+			if err != nil {
+				return err
+			}
+		}
+
 		err = k.addCoins(ctx, outAddress, out.Coins)
 		if err != nil {
 			return err
