@@ -358,6 +358,9 @@ func (svd SigVerificationDecorator) verifySig(ctx context.Context, tx sdk.Tx, ac
 			Value:   anyPk.Value,
 		},
 	}
+
+	fmt.Printf("SigVerificationDecorator.verifySig: AccountNumber %d ChainID %s\n", accNum, chainID)
+
 	adaptableTx, ok := tx.(authsigning.V2AdaptableTx)
 	if !ok {
 		return fmt.Errorf("expected tx to implement V2AdaptableTx, got %T", tx)
