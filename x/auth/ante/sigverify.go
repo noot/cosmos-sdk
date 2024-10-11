@@ -281,6 +281,8 @@ func (svd SigVerificationDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simul
 			Sequence:      acc.GetSequence(),
 		}
 
+		fmt.Printf("SigVerificationDecorator.verifySig: AccountNumber %d ChainID %s\n", accNum, chainID)
+
 		// no need to verify signatures on recheck tx
 		if !simulate && !ctx.IsReCheckTx() {
 			err := authsigning.VerifySignature(pubKey, signerData, sig.Data, svd.signModeHandler, tx)
